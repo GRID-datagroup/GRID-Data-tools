@@ -1,0 +1,4 @@
+# build result
+dist/
+build/
+grid_data_tools.egg-info/
