@@ -2,21 +2,6 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 
-def binary_search(data, t):
-    l, r = 0, len(data) - 1
-    res = r
-    while l <= r:
-        mid = (l + r) // 2
-        if data[mid] >= t:
-            r, res = mid - 1, mid
-        else:
-            l = mid + 1
-
-    if data[res] >= t:
-        return res
-    return len(data)
-
-
 class Significance(object):
     """
     https://iopscience.iop.org/article/10.3847/1538-4365/aab780/meta#apjsaab780s3-4
@@ -36,6 +21,21 @@ class Significance(object):
         B = self.__maximum_B(n, b, sigma)
         S = n * np.log(n / B) + (b - B) ** 2 / (2 * sigma**2) + B - n
         return self.__sgn(n - b) * np.sqrt(2 * S)
+
+
+def binary_search(data, t):
+    l, r = 0, len(data) - 1
+    res = r
+    while l <= r:
+        mid = (l + r) // 2
+        if data[mid] >= t:
+            r, res = mid - 1, mid
+        else:
+            l = mid + 1
+
+    if data[res] >= t:
+        return res
+    return len(data)
 
 
 def latex_string(command: list[str]):

@@ -1,1 +1,1 @@
-include gdt/data/*/*.txt
+include grid/data/*/*.txt

@@ -7,14 +7,14 @@ def requirement_control():
 
 
 # Import the version information from the package init file
-with open("gdt/__init__.py") as f:
+with open("grid/__init__.py") as f:
     exec(f.read())
 
 setup(
     name="grid-data-tools",
     version=__version__,
     url="https://grid.com",
-    packages=["gdt", "gdt.plot", "gdt.utils"],
+    packages=["grid", "grid.plot", "grid.utils"],
     license="license.txt",
     author="GRID Team",
     author_email="grid@grid.com",

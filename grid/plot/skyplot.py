@@ -3,7 +3,7 @@ from gbm.plot import SkyPlot
 from gbm.data import HealPix
 from pyquaternion import Quaternion
 
-from ..utils.coords import get_sun_pos, xyz_to_radec, get_geocenter_pos
+from ..coords import get_sun_pos, xyz_to_radec, get_geocenter_pos
 
 
 class SkyPlotGRID(SkyPlot):

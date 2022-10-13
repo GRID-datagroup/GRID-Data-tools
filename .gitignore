@@ -2,3 +2,6 @@
 dist/
 build/
 grid_data_tools.egg-info/
+
+# Cache
+__pycache__
