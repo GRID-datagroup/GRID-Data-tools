@@ -14,7 +14,7 @@ setup(
     name="grid-data-tools",
     version=__version__,
     url="https://grid.com",
-    packages=["grid", "grid.plot", "grid.utils"],
+    packages=["grid", "grid.binning", "grid.data", "grid.plot", "grid.utils"],
     license="license.txt",
     author="GRID Team",
     author_email="grid@grid.com",

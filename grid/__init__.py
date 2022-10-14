@@ -1,5 +1,5 @@
 # Version of the GRID Data Tools
-__version__ = "0.1.0a1"
+__version__ = "0.1.0"
 
 import os
 import pathlib

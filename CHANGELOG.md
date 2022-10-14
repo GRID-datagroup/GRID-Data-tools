@@ -1,3 +1,7 @@
+# 0.1.0
+## Fix
+* add module `binned` and `data` to `setup`
+
 # 0.1.0a1
 ## Rename
 * change `gdt` to `grid`
