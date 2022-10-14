@@ -1,49 +1,30 @@
 import numpy as np
+
 from gbm.plot import Lightcurve
-from gbm.data.primitives import TimeBins
-from ..data.evt import remove_zero_bins
+
+from ..binning.binned import remove_zero_bins
 
 
 class LightCurveGRID(Lightcurve):
     def __init__(self, figsize=(12, 4), **kwargs):
         super().__init__(figsize=figsize, **kwargs)
 
-    def plot_curve(self, count, edges, weight=None, color="orange", **kwargs):
-        """Plot curve
+    def plot_curve(self, data, color="blue", **kwargs):
+        """Plot extra curve
 
         Parameters
         ----------
-        count : array(int)
-            count per bin
-        edges: array(float)
-            low and high edge of per bin
+        data: :class:`~gbm.data.primitives.TimeBins:
+            The lightcurve data to plot
         color: str
             color of curve
         """
-        weight = np.ones_like(count) if weight is None else weight
-        data = TimeBins(count * weight, edges[:-1], edges[1:], edges[1:] - edges[:-1])
         for seg in remove_zero_bins(data).contiguous_bins():
             edges = np.concatenate(
                 ([seg.lo_edges[0]], seg.lo_edges, [seg.hi_edges[-1]])
             )
             rates = np.concatenate(([seg.rates[0]], seg.rates, [seg.rates[-1]]))
-
             self._ax.step(edges, rates, where="post", color=color, **kwargs)
-
-    def plot_light_curve(self, count, edges):
-        """Plot light curve
-
-        Parameters
-        ----------
-        count : array(int)
-            count per bin
-        edges: array(float)
-            low and high edge of per bin
-        dire: bool, optional
-            if true, draw points to indicate direction, from red to blue, default true.
-        """
-        data = TimeBins(count, edges[:-1], edges[1:], edges[1:] - edges[:-1])
-        self.set_data(data)
 
     def save(self, title, path):
         self._ax.set_title(title)

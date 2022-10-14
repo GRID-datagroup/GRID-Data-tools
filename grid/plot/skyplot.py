@@ -1,9 +1,12 @@
 import numpy as np
-from gbm.plot import SkyPlot
-from gbm.data import HealPix
 from pyquaternion import Quaternion
 
-from ..coords import get_sun_pos, xyz_to_radec, get_geocenter_pos
+from gbm.plot import SkyPlot
+from gbm.data import HealPix
+from gbm.coords import get_sun_loc
+
+from ..data import PosAtt
+from ..coords import xyz_to_radec
 
 
 class SkyPlotGRID(SkyPlot):
@@ -17,56 +20,37 @@ class SkyPlotGRID(SkyPlot):
         normal direction of detector
     """
 
-    _radius = 6378137.0
-    _normal = np.array([0, 0, -1])
-
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def plot_sun_d(self, utc, **kwargs):
-        """Plot the sun
+    def add_poshist(self, data: PosAtt, trigtime, geo=True, sun=True):
+        """Add a Position History to plot the location of the Earth, Sun, and detector pointing
 
         Parameters
         ----------
-        utc : float
-            utc time
+        data: :class:`~grid.data.PosAtt`
+            A Position History or Trigdat object
+        trigtime: float, optional:
+            The Trigdat trigger time overrides this
+        geo: bool, optional
+            If True, plot the Earth. Default is True.
+        sun: bool, optional
+            If True, plot the Sun. Default is True.
         """
-        ra, dec = get_sun_pos(utc)
-        self.plot_sun(ra, dec, **kwargs)
+        if sun:
+            sun_loc = get_sun_loc(trigtime)
+            self.plot_sun(*sun_loc)
+        if geo:
+            geo_ra, geo_dec = data.get_geocenter_radec(trigtime)
+            radius = data.get_earth_radius(trigtime)
+            self.plot_earth(geo_ra, geo_dec, radius)
 
-    def plot_earth_d(self, coord, altitude):
-        """Plot the earth
+        ra, dec = data.detector_pointing(trigtime)
+        self.plot_detector(ra, dec, data.detector.id + "-10", radius=10)
+        self.plot_detector(ra, dec, data.detector.id + "-30", radius=30)
+        self.plot_detector(ra, dec, data.detector.id + "-60", radius=60)
 
-        Parameters
-        ----------
-        coord : (float, float, float)
-            coordinate tuple of detector in eic
-        altitude: float
-            altitudes of detector in eic
-        """
-        ra, dec = get_geocenter_pos(coord)
-        radius = np.rad2deg(np.arcsin(self._radius / (self._radius + altitude)))
-        self.plot_earth(ra, dec, radius)
-
-    def plot_detector_d(self, quat):
-        """Plot detector pointing
-
-        Parameters
-        ----------
-        quat : (float, float, float, float)
-            quaternion of detector
-        """
-        Q = Quaternion(quat)
-        dire = Q.rotate(self._normal)
-        ra, dec = xyz_to_radec(dire)
-        self._ax.plot(
-            -np.deg2rad(ra - 180), np.deg2rad(dec), "p", color="red", markersize=10
-        )
-        self.plot_detector(ra, dec, "10", radius=10)
-        self.plot_detector(ra, dec, "30", radius=30)
-        self.plot_detector(ra, dec, "60", radius=60)
-
-    def plot_source(self, ra, dec, error, color="purple"):
+    def plot_source(self, ra, dec, error=1, color="purple"):
         """Plot the direction of the GRB source
 
         Parameters
@@ -76,7 +60,7 @@ class SkyPlotGRID(SkyPlot):
         dec : float
             declination (degree)
         error : float
-            error with a confidence of 1 sigma
+            error with a confidence of 1 sigma (in deg)
         color : str
             color
         """
@@ -84,8 +68,8 @@ class SkyPlotGRID(SkyPlot):
             -np.deg2rad(ra - 180), np.deg2rad(dec), "*", color="red", markersize=10
         )
         self.plot_detector(ra, dec, "source", radius=error, color=color)
-        # gauss_map = HealPix.from_gaussian(ra, dec, error)
-        # self.add_healpix(gauss_map)
+        gauss_map = HealPix.from_gaussian(ra, dec, error)
+        self.add_healpix(gauss_map)
 
     def save(self, title, path):
         self._ax.set_title(title)
