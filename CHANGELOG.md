@@ -1,3 +1,11 @@
+# 0.1.1
+# Change
+* `get_edges` move to `binned`
+## Add
+* add bin_by_max_count in `unbinned`
+## Fix
+* `Evt` convert to `phaii`
+
 # 0.1.0
 ## Fix
 * add module `binned` and `data` to `setup`
