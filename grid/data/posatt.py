@@ -99,8 +99,6 @@ class PosAtt(PosHist):
         self._quat_interp = interp1d(times, quat)
 
         # Orbital position interpolator
-        # mark TODO: poshist uses the "simple" version of lat/lon calc
-
         self._lat_interp = interp1d(times, data["Latitude"])
         self._lon_interp = interp1d(times, data["Longitude"])
         self._alt_interp = interp1d(times, data["Altitude"])

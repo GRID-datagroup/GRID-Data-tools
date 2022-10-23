@@ -2,6 +2,7 @@ import numpy as np
 from astropy.io import fits
 
 from gbm.data import TTE, Cspec
+from gbm.data import headers as hdr
 from gbm.data.primitives import EventList
 
 from ..detector import Detector
@@ -9,7 +10,7 @@ from ..detector import Detector
 
 class Evt(TTE):
     def __init__(self, d: Detector):
-        """PosAtt object
+        """Evt object
 
         Parameters
         ----------
@@ -23,9 +24,159 @@ class Evt(TTE):
     def detector(self):
         return self._detector
 
+    @property
+    def energy_range(self):
+        data = self._data
+        if data.size > 0:
+            emin = data._ebounds[data.pha.min() - 1]['E_MIN']
+            emax = data._ebounds[data.pha.max() - 1]['E_MAX']
+            return (emin, emax)
+
+    @classmethod
+    def from_data(
+        cls,
+        data,
+        detector,
+        gti=None,
+        trigtime=0.0,
+        object=None,
+        ra_obj=None,
+        dec_obj=None,
+        err_rad=None,
+    ):
+        """Create a Evt object from an EventList data object.
+
+        Parameters
+        ----------
+        data: :class:`~.primitives.EventList`
+            The event data
+        detector: :class:`~grid.detector.Detector`
+            detector to plot the pointing on the sky
+        gti: [(float, float), ...], optional
+            The list of tuples representing the good time intervals (start, stop). If omitted, the GTI is assumed to be [(tstart, tstop)].
+        trigtime: float, optional:
+            The trigger time, if applicable. If provided, the data times will be shifted relative to the trigger time.
+        object: str, optional
+            The object being observed
+        ra_obj: float, optional
+            The RA of the object
+        dec_obj: float, optional
+            The Dec of the object
+        err_rad: float, optional
+            The localization error radius of the object
+
+        Returns
+        -------
+        : :class:`Evt`
+            The newly created Evt object
+        """
+        obj = cls(detector)
+        filetype = "GBM PHOTON LIST"
+        obj._data = data
+        detchans = data.numchans
+        tstart, tstop = data.time_range
+
+        try:
+            trigtime = float(trigtime)
+        except:
+            raise TypeError("trigtime must be a float")
+
+        if trigtime < 0.0:
+            raise ValueError("trigtime must be non-negative")
+
+        obj._trigtime = trigtime
+        tstart += trigtime
+        tstop += trigtime
+
+        detector = None if detector == "" else detector
+        object = None if object == "" else object
+        ra_obj = None if ra_obj == "" else ra_obj
+        dec_obj = None if dec_obj == "" else dec_obj
+        err_rad = None if err_rad == "" else err_rad
+
+        # create the primary extension
+        primary_header = hdr.primary(
+            detnam=detector,
+            filetype=filetype,
+            tstart=tstart,
+            tstop=tstop,
+            trigtime=trigtime,
+            object=object,
+            ra_obj=ra_obj,
+            dec_obj=dec_obj,
+            err_rad=err_rad,
+        )
+        headers = [primary_header]
+        header_names = ["PRIMARY"]
+
+        # ebounds extension
+        ebounds_header = hdr.ebounds(
+            detnam=detector,
+            tstart=tstart,
+            tstop=tstop,
+            trigtime=trigtime,
+            object=object,
+            ra_obj=ra_obj,
+            dec_obj=dec_obj,
+            err_rad=err_rad,
+            detchans=detchans,
+        )
+        headers.append(ebounds_header)
+        header_names.append("EBOUNDS")
+
+        # spectrum extension
+        events_header = hdr.events(
+            detnam=detector,
+            tstart=tstart,
+            tstop=tstop,
+            trigtime=trigtime,
+            object=object,
+            ra_obj=ra_obj,
+            dec_obj=dec_obj,
+            err_rad=err_rad,
+            detchans=detchans,
+        )
+        headers.append(events_header)
+        header_names.append("EVENTS")
+
+        # gti extension
+        if gti is None:
+            gti = [data.time_range]
+        ngti = len(gti)
+        gti_rec = np.recarray(ngti, dtype=[("START", ">f8"), ("STOP", ">f8")])
+        gti_rec["START"] = [one_gti[0] for one_gti in gti]
+        gti_rec["STOP"] = [one_gti[1] for one_gti in gti]
+        gti_header = hdr.gti(
+            detnam=detector,
+            tstart=tstart,
+            tstop=tstop,
+            trigtime=trigtime,
+            object=object,
+            ra_obj=ra_obj,
+            dec_obj=dec_obj,
+            err_rad=err_rad,
+        )
+        headers.append(gti_header)
+        header_names.append("GTI")
+        obj._gti = gti_rec
+
+        # store headers and set data properties
+        obj._headers = {name: header for name, header in zip(header_names, headers)}
+
+        # set file info
+        trig = None if obj.trigtime == 0.0 else obj.trigtime
+        obj.set_properties(
+            detector=detector,
+            trigtime=trig,
+            tstart=obj.time_range[0],
+            datatype="tte",
+            extension="fit",
+        )
+        return obj
+
     @classmethod
     def open(cls, filename, d: Detector):
-        """Open a TTE FITS file and return the TTE object
+        """Open a Evt FITS file and return the Evt object
 
         Parameters
         ----------
@@ -61,12 +212,16 @@ class Evt(TTE):
                 ("DEAD_TIME", "u1"),
                 ("EVT_TYPE", "u1"),
             ]
+            events = np.array(
+                list(zip(events["TIME"], events["PHA"])),
+                dtype=[("TIME", ">f8"), ("PHA", ">i2")],
+            )
 
             # Do this for GTI as well
             gti = hdul["GTI"].data
             gti = np.vstack((gti["START"], gti["STOP"])).squeeze().T
 
-            # create the EventList, the core of the TTE class
+            # create the EventList, the core of the Evt class
             obj._data = EventList.from_fits_array(events, ebounds)
             obj._gti = gti
 
