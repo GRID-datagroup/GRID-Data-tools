@@ -149,5 +149,6 @@ class EarthPlotGRID(EarthPlot):
         cbar.draw_all()
 
     def save(self, title, path):
-        self._ax.set_title(title)
-        self._figure.savefig(path)
+        self.ax.set_title(title)
+        self.fig.savefig(path)
+        plt.close(self.fig)

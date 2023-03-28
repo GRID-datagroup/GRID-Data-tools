@@ -28,8 +28,8 @@ class Evt(TTE):
     def energy_range(self):
         data = self._data
         if data.size > 0:
-            emin = data._ebounds[data.pha.min() - 1]['E_MIN']
-            emax = data._ebounds[data.pha.max() - 1]['E_MAX']
+            emin = data._ebounds[data.pha.min() - 1]["E_MIN"]
+            emax = data._ebounds[data.pha.max() - 1]["E_MAX"]
             return (emin, emax)
 
     @classmethod

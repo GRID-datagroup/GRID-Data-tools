@@ -1,12 +1,12 @@
 import numpy as np
-from pyquaternion import Quaternion
+from matplotlib import pyplot as plt
 
 from gbm.plot import SkyPlot
 from gbm.data import HealPix
 from gbm.coords import get_sun_loc
 
 from ..data import PosAtt
-from ..coords import xyz_to_radec
+from ..utils.coords import xyz_to_radec
 
 
 class SkyPlotGRID(SkyPlot):
@@ -72,5 +72,6 @@ class SkyPlotGRID(SkyPlot):
         self.add_healpix(gauss_map)
 
     def save(self, title, path):
-        self._ax.set_title(title)
-        self._figure.savefig(path)
+        self.ax.set_title(title)
+        self.fig.savefig(path)
+        plt.close(self.fig)

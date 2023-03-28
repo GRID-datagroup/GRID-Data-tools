@@ -1,21 +1,26 @@
+# 0.2.0
+## Refactor
+* move `coords` and `time` into `utils`
+## Feat
+* some coordinate conversion functions in `utils.coords`
+* some time conversion functions in `utils.time`
+
 # 0.1.1
-# Change
-* `get_edges` move to `binned`
-## Add
+## Feat
 * add bin_by_max_count in `unbinned`
+
 ## Fix
 * `Evt` convert to `phaii`
+
+## Others
+* `get_edges` move to `binned`
 
 # 0.1.0
 ## Fix
 * add module `binned` and `data` to `setup`
 
 # 0.1.0a1
-## Rename
-* change `gdt` to `grid`
-* move `coords` and `logger` to root directory
-
-## Add
+## Feat
 * class `Detector`, `TimeGRIDSec`, `MetGRID`
 * module `binned`
 * module `data` (class `Evt`, `PosAtt`)
@@ -25,12 +30,14 @@
 ## Remove
 * `get_sun_pos` and `get_geocenter_pos` in `coords`
 
-## Change
+## Others
+* change `gdt` to `grid`
+* move `coords` and `logger` to root directory
 * move `in_hia` from `class:EarthPlotGRID` to `class:HIA`
 * change plot class
 
 # 0.1.0a0
-## Add
+## Feat
 * CheckGRID
 * EatrhPlotGRID
 * LightCurveGRID

@@ -11,7 +11,7 @@ from gbm.coords import geocenter_in_radec
 from .. import data_path
 from ..utils import HIA
 from ..detector import Detector
-from ..coords import xyz_to_radec
+from ..utils.coords import xyz_to_radec
 
 
 class PosAtt(PosHist):

@@ -9,15 +9,15 @@ class CheckPlotGRID(object):
 
     Paramaters
     ----------
-    lc : :class:`~gbm.data.primitives.TimeBins`
+    lc: :class:`~gbm.data.primitives.TimeBins`
         light curve data to plot
     orb: :class:`~grid.data.PosAtt`
         A Position History fits file
     trigtime: float, optional
         set trigtime to a particular time of interest to plot detector's orbital location
-    hia : bool, optional
+    hia: bool, optional
         whether to draw high ion area
-    figsize : tuple, optional
+    figsize: tuple, optional
         figure size
     """
 
@@ -29,6 +29,10 @@ class CheckPlotGRID(object):
         self.curve = LightCurveGRID(data=lc, canvas=self._canvas, axis=self._ax1)
         self.earth = EarthPlotGRID(canvas=self._canvas, axis=self._ax2)
         self.earth.add_poshist(orb, trigtime=trigtime, hia=hia)
+
+    @property
+    def fig(self):
+        return self._figure
 
     @property
     def ax1(self):
@@ -43,7 +47,7 @@ class CheckPlotGRID(object):
 
         Parameters
         ----------
-        data: :class:`~gbm.data.primitives.TimeBins:
+        data: :class:`~gbm.data.primitives.TimeBins`
             The lightcurve data to plot
         color: str
             color of curve
@@ -65,6 +69,7 @@ class CheckPlotGRID(object):
         self.earth.plot_orbit(data, color, numpts)
 
     def save(self, title, path):
-        self._ax1.set_title(title + "\n Light Curve")
-        self._ax2.set_title("Orbit")
-        self._figure.savefig(path)
+        self.ax1.set_title(title + "\n Light Curve")
+        self.ax2.set_title("Orbit")
+        self.fig.savefig(path)
+        plt.close(self.fig)
